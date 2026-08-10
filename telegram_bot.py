@@ -41,17 +41,21 @@ def send_telegram_notification(
     if video_file_path and os.path.exists(video_file_path):
         send_video_url = f"https://api.telegram.org/bot{bot_token}/sendVideo"
         try:
+            log_event(None, "INFO", f"Telegram'a MP4 video dosyası yükleniyor: {video_file_path}")
             with open(video_file_path, "rb") as video_file:
-                files = {"video": video_file}
+                files = {"video": (os.path.basename(video_file_path), video_file, "video/mp4")}
                 data = {
                     "chat_id": chat_id,
                     "caption": caption,
-                    "parse_mode": "Markdown"
+                    "parse_mode": "Markdown",
+                    "supports_streaming": True
                 }
-                resp = requests.post(send_video_url, data=data, files=files, timeout=60)
+                resp = requests.post(send_video_url, data=data, files=files, timeout=120)
                 if resp.status_code == 200:
-                    log_event(None, "INFO", f"Telegram'a video dosyası yüklendi: {video_file_path}")
+                    log_event(None, "INFO", f"Telegram'a MP4 video dosyası başarıyla gönderildi: {video_file_path}")
                     return True
+                else:
+                    log_event(None, "WARNING", f"Telegram sendVideo yanıtı: {resp.status_code} - {resp.text}")
         except Exception as e:
             log_event(None, "ERROR", f"Telegram video gönderme hatası: {str(e)}")
 
