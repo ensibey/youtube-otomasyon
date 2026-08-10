@@ -1,5 +1,6 @@
 import os
 import subprocess
+import random
 from pathlib import Path
 from typing import Optional
 from config import OUTPUT_DIR
@@ -37,8 +38,12 @@ def process_shorts_video(
         "box=1:boxcolor=black@0.8:boxborderw=20[v]"
     )
 
+    # Pick random start offset (5s - 90s) so background clip is never identical
+    start_sec = random.randint(5, 90)
+
     if audio_file and os.path.exists(audio_file):
         ffmpeg_cmd.extend([
+            "-ss", str(start_sec),
             "-stream_loop", "-1", "-i", bg_video,
             "-i", audio_file,
             "-filter_complex", filter_complex,
