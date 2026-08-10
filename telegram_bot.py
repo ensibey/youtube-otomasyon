@@ -9,10 +9,12 @@ def send_telegram_notification(
     video_url: str,
     filename: str = "",
     status: str = "Success",
-    error_msg: str = ""
+    error_msg: str = "",
+    video_file_path: str = ""
 ) -> bool:
     """
     Sends real-time notification to user's Telegram chat or group.
+    If video_file_path exists, sends the actual rendered MP4 video directly to Telegram!
     """
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         log_event(None, "WARNING", "Telegram BOT_TOKEN veya CHAT_ID tanımlı değil. Telegram bildirimi atlandı.")
@@ -21,20 +23,39 @@ def send_telegram_notification(
 
     status_icon = "✅" if status.lower() == "success" else "❌"
     
-    message = (
-        f"🎬 **[{channel_name}] Shorts Yüklendi!**\n\n"
+    caption = (
+        f"🎬 **[{channel_name}] AI Shorts Üretildi!**\n\n"
         f"📌 **Başlık:** {title}\n"
         f"🔗 **YouTube Shorts Linki:** {video_url}\n"
-        f"📂 **Drive Dosyası:** `{filename}`\n"
+        f"📂 **Kaynak:** `{filename}`\n"
         f"⚡ **Durum:** {status_icon} {status}\n"
     )
     if error_msg:
-        message += f"⚠️ **Hata Detayı:** {error_msg}\n"
+        caption += f"⚠️ **Hata Detayı:** {error_msg}\n"
 
+    # 1. Try sending the rendered MP4 video file directly to Telegram Chat
+    if video_file_path and os.path.exists(video_file_path):
+        send_video_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendVideo"
+        try:
+            with open(video_file_path, "rb") as video_file:
+                files = {"video": video_file}
+                data = {
+                    "chat_id": TELEGRAM_CHAT_ID,
+                    "caption": caption,
+                    "parse_mode": "Markdown"
+                }
+                resp = requests.post(send_video_url, data=data, files=files, timeout=60)
+                if resp.status_code == 200:
+                    log_event(None, "INFO", f"Telegram'a video dosyası yüklendi: {video_file_path}")
+                    return True
+        except Exception as e:
+            log_event(None, "ERROR", f"Telegram video gönderme hatası: {str(e)}")
+
+    # 2. Fallback: Send text message notification
     telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
+        "text": caption,
         "parse_mode": "Markdown",
         "disable_web_page_preview": False
     }
@@ -42,7 +63,7 @@ def send_telegram_notification(
     try:
         response = requests.post(telegram_api_url, json=payload, timeout=10)
         if response.status_code == 200:
-            log_event(None, "INFO", f"Telegram bildirimi gönderildi: {channel_name}")
+            log_event(None, "INFO", f"Telegram metin bildirimi gönderildi: {channel_name}")
             return True
         else:
             log_event(None, "ERROR", f"Telegram API hatası: {response.text}")

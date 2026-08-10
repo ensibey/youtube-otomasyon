@@ -98,13 +98,14 @@ def run_channel_pipeline(channel_id: str) -> Dict[str, Any]:
         if source == "drive":
             drive_service.mark_as_uploaded(channel_id, filename, drive_file_id)
 
-        # 7. Send Telegram Notification to phone!
+        # 7. Send Telegram Notification to phone with actual MP4 video file!
         send_telegram_notification(
             channel_name=channel_name,
             title=title,
             video_url=yt_url,
             filename=filename,
-            status="Success"
+            status="Success",
+            video_file_path=final_shorts_path
         )
         return {"success": True, "channel": channel_name, "url": yt_url}
     else:
