@@ -9,66 +9,47 @@ def process_shorts_video(
     input_video_path: str,
     output_filename: str,
     hook_text: str = "WAIT FOR THE END 😱",
+    voiceover_path: str = "",
     niche: str = "minecraft"
 ) -> str:
     """
     Transforms video or AI audio into a vibrant 9:16 vertical Shorts video (1080x1920).
-    When input is AI voiceover audio, fetches real Minecraft/Roblox gameplay videos automatically!
+    Merges background gameplay/AI video clip with AI voiceover audio track.
     """
     output_path = OUTPUT_DIR / output_filename
     clean_hook = hook_text.replace("'", "").replace(":", "-").replace('"', '')
 
-    is_audio_only = input_video_path.endswith(".mp3") or input_video_path.endswith(".wav")
+    # Ensure background video exists
+    if not input_video_path or not os.path.exists(input_video_path) or input_video_path.endswith(".mp3"):
+        from video_fetcher import get_gameplay_clip
+        bg_video = get_gameplay_clip(niche)
+        audio_file = input_video_path if input_video_path.endswith(".mp3") else voiceover_path
+    else:
+        bg_video = input_video_path
+        audio_file = voiceover_path
 
     ffmpeg_cmd = ["ffmpeg", "-y"]
 
-    if is_audio_only:
-        audio_file = input_video_path
-        # Fetch real Minecraft/Roblox gameplay clip
-        from video_fetcher import get_gameplay_clip
-        bg_file = get_gameplay_clip(niche)
+    filter_complex = (
+        "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
+        "crop=1080:1920,"
+        f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=yellow:fontsize=56:x=(w-text_w)/2:y=180:"
+        "box=1:boxcolor=black@0.8:boxborderw=20[v]"
+    )
 
-        if bg_file and os.path.exists(bg_file):
-            filter_complex = (
-                "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
-                "crop=1080:1920,"
-                f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=yellow:fontsize=56:x=(w-text_w)/2:y=180:"
-                "box=1:boxcolor=black@0.8:boxborderw=20[v]"
-            )
-            ffmpeg_cmd.extend([
-                "-stream_loop", "-1", "-i", bg_file,
-                "-i", audio_file,
-                "-filter_complex", filter_complex,
-                "-map", "[v]",
-                "-map", "1:a",
-                "-shortest"
-            ])
-        else:
-            # Fallback color canvas if clip fetch fails
-            filter_complex = (
-                "[0:v]scale=1080:1920,"
-                f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=yellow:fontsize=52:x=(w-text_w)/2:y=200:"
-                "box=1:boxcolor=black@0.85:boxborderw=25[v]"
-            )
-            ffmpeg_cmd.extend([
-                "-f", "lavfi", "-i", "color=c=0x1e1e2e:s=1080x1920:r=24",
-                "-i", audio_file,
-                "-filter_complex", filter_complex,
-                "-map", "[v]",
-                "-map", "1:a",
-                "-shortest"
-            ])
-    else:
-        filter_complex = (
-            "scale=1080:1920:force_original_aspect_ratio=increase,"
-            "crop=1080:1920,"
-            f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=120:"
-            "box=1:boxcolor=black@0.7:boxborderw=15"
-        )
+    if audio_file and os.path.exists(audio_file):
         ffmpeg_cmd.extend([
-            "-i", input_video_path,
-            "-vf", filter_complex,
-            "-c:a", "copy"
+            "-stream_loop", "-1", "-i", bg_video,
+            "-i", audio_file,
+            "-filter_complex", filter_complex,
+            "-map", "[v]",
+            "-map", "1:a",
+            "-shortest"
+        ])
+    else:
+        ffmpeg_cmd.extend([
+            "-i", bg_video,
+            "-vf", filter_complex
         ])
 
     ffmpeg_cmd.extend([
