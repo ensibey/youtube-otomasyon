@@ -1,8 +1,23 @@
 import os
+import sys
 import json
 import random
 from typing import Dict, Any
-from config import GEMINI_API_KEY
+
+# Enable UTF-8 encoding for Windows console
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+# Load environment variables from .env file if present
+env_file = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(env_file):
+    with open(env_file, "r", encoding="utf-8") as f:
+        for line in f:
+            if "=" in line and not line.startswith("#"):
+                key, val = line.strip().split("=", 1)
+                os.environ[key] = val
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 from database import log_event
 
 # Fallback presets when API Key is missing or quota exceeded
