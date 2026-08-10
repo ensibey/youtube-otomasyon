@@ -5,53 +5,29 @@ from pathlib import Path
 from config import CLIP_POOL_DIR
 from database import log_event
 
-# High Quality 60FPS Minecraft & Roblox Parkour/Gameplay Video Clips
-PARKOUR_CLIPS = {
-    "minecraft": [
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
-    ],
-    "roblox": [
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
-    ]
-}
-
 def get_gameplay_clip(niche: str) -> str:
     """
-    Fetches real 60 FPS Minecraft or Roblox parkour/gameplay video clips.
+    Returns a real Minecraft/Roblox gameplay video clip from clip_pool/ directory.
+    User can drop any .mp4 gameplay/parkour files into clip_pool/ for custom videos.
     """
     niche_lower = niche.lower()
     tag = "minecraft" if any(k in niche_lower for k in ["mc", "minecraft", "craft"]) else "roblox"
 
-    # 1. Check existing local parkour clips in clip_pool/
-    local_clips = [f for f in CLIP_POOL_DIR.glob("*.mp4") if f.stat().st_size > 1000000]
-    if local_clips:
-        selected = random.choice(local_clips)
-        log_event(None, "INFO", f"Parkour klibi seçildi: {selected.name}")
+    # Fetch all valid MP4 clips in clip_pool/
+    clips = [f for f in CLIP_POOL_DIR.glob("*.mp4") if f.stat().st_size > 100000]
+    
+    # Filter tag specific clips if available
+    tag_clips = [f for f in clips if tag in f.name.lower()]
+    pool = tag_clips if tag_clips else clips
+
+    if pool:
+        selected = random.choice(pool)
+        log_event(None, "INFO", f"Klip havuzundan oynanış klibi seçildi: {selected.name}")
         return str(selected)
 
-    # 2. Download high-quality gameplay clip
-    urls = PARKOUR_CLIPS.get(tag, PARKOUR_CLIPS["minecraft"])
-    target_url = random.choice(urls)
-    dest_path = CLIP_POOL_DIR / f"{tag}_parkour_{int(random.randint(100, 999))}.mp4"
-
-    try:
-        log_event(None, "INFO", f"Gerçek 60FPS {tag.upper()} parkour arka plan klibi indiriliyor...")
-        r = requests.get(target_url, stream=True, timeout=30)
-        if r.status_code == 200:
-            with open(dest_path, "wb") as f:
-                for chunk in r.iter_content(chunk_size=1024*1024):
-                    if chunk:
-                        f.write(chunk)
-            log_event(None, "INFO", f"Parkour klibi indirildi: {dest_path.name}")
-            return str(dest_path)
-    except Exception as e:
-        log_event(None, "ERROR", f"Parkour klibi indirme hatası: {str(e)}")
-
+    log_event(None, "WARNING", "clip_pool klasöründe henüz .mp4 oynanış videosu bulunamadı.")
     return ""
 
 if __name__ == "__main__":
     clip = get_gameplay_clip("minecraft")
-    print("Parkour Clip Path:", clip)
+    print("Selected Clip Path:", clip)
