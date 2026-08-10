@@ -41,21 +41,21 @@ class ChannelConfig(BaseModel):
     made_for_kids: bool = False
     voice: str = "tr-TR-AhmetNeural"
 
-# 10 PURE MINECRAFT & ROBLOX AI CHANNELS
+# 10 PURE MINECRAFT & ROBLOX AI CHANNELS (ALL ENGLISH GLOBAL SHORT CHANNELS)
 DEFAULT_CHANNELS: List[ChannelConfig] = [
-    # 5 MINECRAFT AI CHANNELS
-    ChannelConfig(id="ch_01", name="Minecraft AI Hikayeleri TR", niche="mc_ai_stories_tr", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_02", name="Minecraft AI Gizemleri TR", niche="mc_ai_myths_tr", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_03", name="Minecraft AI Shorts Global (EN)", niche="mc_ai_global_en", language="en", voice="en-US-ChristopherNeural"),
-    ChannelConfig(id="ch_04", name="Minecraft AI Brainrot & Memes", niche="mc_ai_memes", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_05", name="Minecraft AI Satisfying ASMR", niche="mc_ai_asmr", language="en", voice="en-US-AriaNeural"),
+    # 5 MINECRAFT GLOBAL AI CHANNELS (ENGLISH)
+    ChannelConfig(id="ch_01", name="Minecraft AI Mystery & Myths", niche="minecraft", language="en", voice="en-US-ChristopherNeural"),
+    ChannelConfig(id="ch_02", name="Minecraft AI Creepypasta Stories", niche="minecraft", language="en", voice="en-US-AndrewNeural"),
+    ChannelConfig(id="ch_03", name="Minecraft AI Shorts Global", niche="minecraft", language="en", voice="en-US-BrianNeural"),
+    ChannelConfig(id="ch_04", name="Minecraft AI Brainrot & Memes", niche="minecraft", language="en", voice="en-US-SteffanNeural"),
+    ChannelConfig(id="ch_05", name="Minecraft AI Satisfying Facts", niche="minecraft", language="en", voice="en-US-GuyNeural"),
 
-    # 5 ROBLOX AI CHANNELS
-    ChannelConfig(id="ch_06", name="Roblox AI Hikayeleri TR", niche="roblox_ai_stories_tr", language="tr", voice="tr-TR-EmelNeural"),
-    ChannelConfig(id="ch_07", name="Roblox AI Gizli Taktikler TR", niche="roblox_ai_hacks_tr", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_08", name="Roblox AI Confessions (EN)", niche="roblox_ai_global_en", language="en", voice="en-US-JennyNeural"),
-    ChannelConfig(id="ch_09", name="Roblox AI Brookhaven Sırları", niche="roblox_ai_brookhaven", language="tr", voice="tr-TR-EmelNeural"),
-    ChannelConfig(id="ch_10", name="Roblox vs Minecraft AI Battles", niche="roblox_ai_versus", language="tr", voice="tr-TR-AhmetNeural"),
+    # 5 ROBLOX GLOBAL AI CHANNELS (ENGLISH)
+    ChannelConfig(id="ch_06", name="Roblox AI Confessions & Stories", niche="roblox", language="en", voice="en-US-ChristopherNeural"),
+    ChannelConfig(id="ch_07", name="Roblox AI Secret Hacks & Myths", niche="roblox", language="en", voice="en-US-AndrewNeural"),
+    ChannelConfig(id="ch_08", name="Roblox AI Brookhaven Secrets", niche="roblox", language="en", voice="en-US-BrianNeural"),
+    ChannelConfig(id="ch_09", name="Roblox AI Scary Creepypastas", niche="roblox", language="en", voice="en-US-SteffanNeural"),
+    ChannelConfig(id="ch_10", name="Roblox vs Minecraft AI Battles", niche="roblox", language="en", voice="en-US-GuyNeural"),
 ]
 
 VOICES = {

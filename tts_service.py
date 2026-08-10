@@ -10,15 +10,9 @@ from database import log_event
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 
 async def _generate_edge_tts_async(text: str, voice: str, output_path: str):
-    """Generates audio using Microsoft Edge Multilingual Neural Voices with dynamic pitch/rate."""
-    # Use Multilingual Andrew or Emel for ultra realistic human cadence
-    selected_voice = voice
-    if "Ahmet" in voice:
-        selected_voice = "en-US-AndrewMultilingualNeural"  # Realistic deep male voice with Turkish support
-    elif "Emel" in voice:
-        selected_voice = "en-US-AvaMultilingualNeural"
-
-    communicate = edge_tts.Communicate(text, selected_voice, rate="+3%", pitch="+0Hz")
+    """Generates audio using Microsoft Edge Ultra-Realistic Neural Voices with dynamic pitch/rate."""
+    selected_voice = voice if voice else "en-US-ChristopherNeural"
+    communicate = edge_tts.Communicate(text, selected_voice, rate="+4%", pitch="+0Hz")
     await communicate.save(output_path)
 
 def generate_elevenlabs_voice(text: str, voice_id: str = "21m00Tcm4TlvDq8ikWAM", output_path: str = "") -> bool:
