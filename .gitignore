@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Project Directories & Databases
+downloads/
+output/
+clip_pool/
+youtube_automation.db
+
+# Sensitive OAuth Credentials & Tokens
+credentials/*.json
+tokens/*.json
+.env
+
+# System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
