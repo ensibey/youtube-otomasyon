@@ -25,28 +25,27 @@ PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
 class ChannelConfig(BaseModel):
     id: str
     name: str
-    niche: str  # e.g., "minecraft", "roblox", "gta", "brainrot"
+    niche: str
     drive_folder_id: Optional[str] = ""
-    language: str = "tr"  # "tr" or "en"
+    language: str = "tr"
     daily_target: int = 4
     made_for_kids: bool = False
-    voice: str = "tr-TR-AhmetNeural"  # Default Edge TTS voice
+    voice: str = "tr-TR-AhmetNeural"
 
-# Default 10 Channels Configuration
+# 10 VIRAL HIGH-RETENTION CHANNELS CONFIGURATION
 DEFAULT_CHANNELS: List[ChannelConfig] = [
-    ChannelConfig(id="ch_01", name="Minecraft Shorts TR #1", niche="minecraft", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_02", name="Minecraft Shorts TR #2", niche="minecraft", language="tr", voice="tr-TR-EmelNeural"),
-    ChannelConfig(id="ch_03", name="Roblox Stories TR #1", niche="roblox", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_04", name="Roblox Stories TR #2", niche="roblox", language="tr", voice="tr-TR-EmelNeural"),
-    ChannelConfig(id="ch_05", name="Gaming Myths & Secrets", niche="gaming_myths", language="en", voice="en-US-ChristopherNeural"),
-    ChannelConfig(id="ch_06", name="Minecraft Hacks EN", niche="minecraft", language="en", voice="en-US-GuyNeural"),
-    ChannelConfig(id="ch_07", name="Roblox Funny Moments EN", niche="roblox", language="en", voice="en-US-JennyNeural"),
-    ChannelConfig(id="ch_08", name="Brainrot & Memes TR", niche="brainrot", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_09", name="Satisfying Gaming Shorts", niche="satisfying", language="en", voice="en-US-AriaNeural"),
-    ChannelConfig(id="ch_10", name="GTA 5 Stunts & Shorts", niche="gta", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_01", name="Craft Gizemleri TR", niche="minecraft_myths", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_02", name="CraftStories HQ (EN)", niche="minecraft_stories", language="en", voice="en-US-ChristopherNeural"),
+    ChannelConfig(id="ch_03", name="BloxTR Shorts", niche="roblox_bugs", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_04", name="BloxConfessions (EN)", niche="roblox_drama", language="en", voice="en-US-JennyNeural"),
+    ChannelConfig(id="ch_05", name="BrainrotCraft Shorts", niche="brainrot_memes", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_06", name="GTA Rampage Shorts", niche="gta_stunts", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_07", name="Satisfying Gaming ASMR", niche="satisfying_asmr", language="en", voice="en-US-AriaNeural"),
+    ChannelConfig(id="ch_08", name="VsGaming Shorts", niche="gaming_versus", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_09", name="ProGamer Taktik", niche="pro_hacks", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_10", name="Komik Oyun Anları", niche="funny_fails", language="tr", voice="tr-TR-EmelNeural"),
 ]
 
-# Preferred Edge-TTS Voices
 VOICES = {
     "tr_male": "tr-TR-AhmetNeural",
     "tr_female": "tr-TR-EmelNeural",
