@@ -18,7 +18,6 @@ def process_shorts_video(
     output_path = OUTPUT_DIR / output_filename
     clean_hook = hook_text.replace("'", "").replace(":", "-").replace('"', '')
 
-    # Check if clip_pool directory has background gameplay clips
     clip_pool_dir = Path(__file__).parent / "clip_pool"
     bg_clips = list(clip_pool_dir.glob("*.mp4")) if clip_pool_dir.exists() else []
 
@@ -29,7 +28,6 @@ def process_shorts_video(
     if is_audio_only:
         audio_file = input_video_path
         if bg_clips:
-            # Use gameplay clip from clip_pool
             bg_file = str(bg_clips[0])
             filter_complex = (
                 "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
@@ -46,14 +44,14 @@ def process_shorts_video(
                 "-shortest"
             ])
         else:
-            # Generate vibrant animated testsrc2 dynamic color pattern background
+            # Fast dynamic color background using color animation
             filter_complex = (
                 "[0:v]scale=1080:1920,"
-                f"drawtext=text='{clean_hook}':fontcolor=yellow:fontsize=52:x=(w-text_w)/2:y=200:"
+                f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=yellow:fontsize=52:x=(w-text_w)/2:y=200:"
                 "box=1:boxcolor=black@0.85:boxborderw=25[v]"
             )
             ffmpeg_cmd.extend([
-                "-f", "lavfi", "-i", "testsrc2=s=1080x1920:r=30",
+                "-f", "lavfi", "-i", "color=c=0x1e1e2e:s=1080x1920:r=24",
                 "-i", audio_file,
                 "-filter_complex", filter_complex,
                 "-map", "[v]",
@@ -61,11 +59,10 @@ def process_shorts_video(
                 "-shortest"
             ])
     else:
-        # Standard video input (from Drive or local pending)
         filter_complex = (
             "scale=1080:1920:force_original_aspect_ratio=increase,"
             "crop=1080:1920,"
-            f"drawtext=text='{clean_hook}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=120:"
+            f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=120:"
             "box=1:boxcolor=black@0.7:boxborderw=15"
         )
         ffmpeg_cmd.extend([
@@ -76,7 +73,7 @@ def process_shorts_video(
 
     ffmpeg_cmd.extend([
         "-c:v", "libx264",
-        "-preset", "fast",
+        "-preset", "ultrafast",
         "-t", "58",
         str(output_path)
     ])
