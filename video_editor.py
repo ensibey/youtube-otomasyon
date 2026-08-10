@@ -12,42 +12,56 @@ def process_shorts_video(
     audio_path: Optional[str] = None
 ) -> str:
     """
-    Transforms any video into a 9:16 vertical YouTube Shorts format (1080x1920).
-    Adds top hook banner text overlay and optional AI audio track using FFmpeg.
+    Transforms any video or AI audio into a vibrant 9:16 vertical Shorts video (1080x1920).
+    Uses background gameplay clips from clip_pool/ or generates dynamic animated color background if input is audio.
     """
     output_path = OUTPUT_DIR / output_filename
-    
-    if not os.path.exists(input_video_path):
-        log_event(None, "ERROR", f"Girdi videosu bulunamadı: {input_video_path}")
-        return ""
-
-    # Safe text formatting for FFmpeg drawtext
     clean_hook = hook_text.replace("'", "").replace(":", "-").replace('"', '')
 
-    # Construct FFmpeg command
-    # 1. Scale and crop to 1080x1920 (9:16)
-    # 2. Add Top Hook banner
-    ffmpeg_cmd = [
-        "ffmpeg", "-y",
-        "-i", input_video_path,
-    ]
+    # Check if clip_pool directory has background gameplay clips
+    clip_pool_dir = Path(__file__).parent / "clip_pool"
+    bg_clips = list(clip_pool_dir.glob("*.mp4")) if clip_pool_dir.exists() else []
 
-    if audio_path and os.path.exists(audio_path):
-        ffmpeg_cmd.extend(["-i", audio_path])
-        # Mix original audio with voiceover or replace
-        filter_complex = (
-            "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
-            "crop=1080:1920,"
-            f"drawtext=text='{clean_hook}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=120:"
-            "box=1:boxcolor=black@0.7:boxborderw=15[v]"
-        )
-        ffmpeg_cmd.extend([
-            "-filter_complex", filter_complex,
-            "-map", "[v]",
-            "-map", "1:a",
-            "-shortest"
-        ])
+    is_audio_only = input_video_path.endswith(".mp3") or input_video_path.endswith(".wav")
+
+    ffmpeg_cmd = ["ffmpeg", "-y"]
+
+    if is_audio_only:
+        audio_file = input_video_path
+        if bg_clips:
+            # Use gameplay clip from clip_pool
+            bg_file = str(bg_clips[0])
+            filter_complex = (
+                "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
+                "crop=1080:1920,"
+                f"drawtext=text='{clean_hook}':fontcolor=yellow:fontsize=56:x=(w-text_w)/2:y=180:"
+                "box=1:boxcolor=black@0.8:boxborderw=20[v]"
+            )
+            ffmpeg_cmd.extend([
+                "-i", bg_file,
+                "-i", audio_file,
+                "-filter_complex", filter_complex,
+                "-map", "[v]",
+                "-map", "1:a",
+                "-shortest"
+            ])
+        else:
+            # Generate vibrant animated testsrc2 dynamic color pattern background
+            filter_complex = (
+                "[0:v]scale=1080:1920,"
+                f"drawtext=text='{clean_hook}':fontcolor=yellow:fontsize=52:x=(w-text_w)/2:y=200:"
+                "box=1:boxcolor=black@0.85:boxborderw=25[v]"
+            )
+            ffmpeg_cmd.extend([
+                "-f", "lavfi", "-i", "testsrc2=s=1080x1920:r=30",
+                "-i", audio_file,
+                "-filter_complex", filter_complex,
+                "-map", "[v]",
+                "-map", "1:a",
+                "-shortest"
+            ])
     else:
+        # Standard video input (from Drive or local pending)
         filter_complex = (
             "scale=1080:1920:force_original_aspect_ratio=increase,"
             "crop=1080:1920,"
@@ -55,6 +69,7 @@ def process_shorts_video(
             "box=1:boxcolor=black@0.7:boxborderw=15"
         )
         ffmpeg_cmd.extend([
+            "-i", input_video_path,
             "-vf", filter_complex,
             "-c:a", "copy"
         ])
@@ -62,7 +77,7 @@ def process_shorts_video(
     ffmpeg_cmd.extend([
         "-c:v", "libx264",
         "-preset", "fast",
-        "-t", "58",  # Guarantee < 59s for YouTube Shorts
+        "-t", "58",
         str(output_path)
     ])
 
@@ -73,18 +88,10 @@ def process_shorts_video(
         return str(output_path)
     except subprocess.CalledProcessError as e:
         log_event(None, "ERROR", f"FFmpeg video editleme hatası: {e.stderr.decode('utf-8', errors='ignore')}")
-        # Fallback: Copy file directly if FFmpeg filter fails
-        try:
-            import shutil
-            shutil.copy(input_video_path, str(output_path))
-            return str(output_path)
-        except Exception:
-            return ""
-    except FileNotFoundError:
-        log_event(None, "WARNING", "FFmpeg sistemde bulunamadı. Girdi videosu doğrudan kopyalanıyor.")
-        import shutil
-        shutil.copy(input_video_path, str(output_path))
-        return str(output_path)
+        return ""
+    except Exception as e:
+        log_event(None, "ERROR", f"Video işleme genel hatası: {str(e)}")
+        return ""
 
 if __name__ == "__main__":
     print("Video editor module loaded successfully.")
