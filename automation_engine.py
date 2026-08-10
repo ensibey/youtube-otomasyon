@@ -69,15 +69,9 @@ def run_channel_pipeline(channel_id: str) -> Dict[str, Any]:
     hashtags = metadata.get("hashtags", "#shorts #gaming #viral")
     hook = metadata.get("hook", "BEKLE VE GÖR! 😱")
 
-    # 5. Process & Create 9:16 Shorts Video via Hybrid AI Video Generator
+    # 5. Process & Edit 9:16 Shorts Video using Real 60FPS Gameplay Parkour Clips
     output_filename = f"shorts_{channel_id}_{int(time.time())}.mp4"
-    
-    if source == "ai_generated":
-        from ai_video_generator import create_hybrid_ai_video
-        ai_prompt = f"{niche} viral shorts scene, {title}"
-        final_shorts_path = create_hybrid_ai_video(niche, ai_prompt, voiceover_file, hook, output_filename)
-    else:
-        final_shorts_path = process_shorts_video(input_video_path, output_filename, hook, niche=niche)
+    final_shorts_path = process_shorts_video(input_video_path, output_filename, hook, niche=niche)
 
     if not final_shorts_path or not os.path.exists(final_shorts_path):
         error_msg = "Video editleme/dönüştürme başarısız oldu."
