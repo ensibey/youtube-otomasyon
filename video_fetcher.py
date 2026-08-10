@@ -2,7 +2,7 @@ import os
 import random
 import requests
 from pathlib import Path
-from config import CLIP_POOL_DIR, DEFAULT_GAMEPLAY_CLIPS
+from config import CLIP_POOL_DIR
 from database import log_event
 
 def get_gameplay_clip(niche: str) -> str:
