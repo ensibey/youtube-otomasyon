@@ -54,7 +54,10 @@ def process_shorts_video(
 
     ffmpeg_cmd.extend([
         "-c:v", "libx264",
-        "-preset", "ultrafast",
+        "-preset", "fast",
+        "-crf", "26",
+        "-maxrate", "4M",
+        "-bufsize", "8M",
         "-t", "58",
         str(output_path)
     ])
