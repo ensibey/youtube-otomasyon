@@ -60,14 +60,17 @@ def init_db():
         )
         """)
 
-        # Seed default 10 channels if table is empty
-        cursor.execute("SELECT COUNT(*) as count FROM channels")
-        if cursor.fetchone()["count"] == 0:
-            for ch in DEFAULT_CHANNELS:
-                cursor.execute("""
-                INSERT INTO channels (id, name, niche, drive_folder_id, language, daily_target, voice, made_for_kids, token_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (ch.id, ch.name, ch.niche, ch.drive_folder_id, ch.language, ch.daily_target, ch.voice, 1 if ch.made_for_kids else 0, f"tokens/{ch.id}.json"))
+        # Seed or sync default 10 channels with database
+        for ch in DEFAULT_CHANNELS:
+            cursor.execute("""
+            INSERT INTO channels (id, name, niche, drive_folder_id, language, daily_target, voice, made_for_kids, token_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                name=excluded.name,
+                niche=excluded.niche,
+                language=excluded.language,
+                voice=excluded.voice
+            """, (ch.id, ch.name, ch.niche, ch.drive_folder_id, ch.language, ch.daily_target, ch.voice, 1 if ch.made_for_kids else 0, f"tokens/{ch.id}.json"))
         
         conn.commit()
 
