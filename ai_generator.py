@@ -20,28 +20,28 @@ if os.path.exists(env_file):
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 from database import log_event
 
-# Fallback presets when API Key is missing or quota exceeded
+# Fallback presets when API Key is missing or quota exceeded (100% GLOBAL ENGLISH)
 FALLBACK_METADATA = {
     "minecraft": [
         {
-            "title": "NOBODY EXPECTED THIS IN MINECRAFT 😱 #shorts",
-            "description": "Crazy Minecraft moment you won't believe! Sub for more daily clips!",
-            "hashtags": "#shorts #minecraft #gaming #viral #mcyt",
-            "hook": "WAIT FOR THE END! 😱"
+            "title": "THE DARK SECRET IN MINECRAFT 😱 #shorts",
+            "description": "No one believed what happened in Minecraft at 3 AM! Subscribe for more!",
+            "hashtags": "#shorts #minecraft #gaming #viral #creepypasta",
+            "hook": "NEVER DO THIS 😱"
         },
         {
             "title": "Bro thought he was completely safe 💀 #shorts",
             "description": "Never lower your guard in Minecraft. Double tap if you agree!",
             "hashtags": "#shorts #minecraft #memes #gamer #funny",
-            "hook": "SAKIN SEYRETME! 💀"
+            "hook": "DON'T LOOK BACK 💀"
         }
     ],
     "roblox": [
         {
             "title": "Top 1 Secret in Roblox Nobody Knew! 🤫 #shorts",
-            "description": "Did you know this crazy Roblox trick? Try it out now!",
+            "description": "Did you know this crazy Roblox glitch? Try it out right now!",
             "hashtags": "#shorts #roblox #robloxfunny #gaming",
-            "hook": "THIS ROBLOX SECRET IS CRAZY! 🔥"
+            "hook": "ROBLOX SECRET EXPOSED 🔥"
         }
     ],
     "default": [
@@ -49,15 +49,15 @@ FALLBACK_METADATA = {
             "title": "UNBELIEVABLE GAMING MOMENT! 🎮 #shorts",
             "description": "Best gameplay highlight of the day. Like & Subscribe!",
             "hashtags": "#shorts #gaming #viral #gamer #trend",
-            "hook": "BEKLE VE GÖR! 🔥"
+            "hook": "WAIT FOR THE END 🔥"
         }
     ]
 }
 
 FALLBACK_SCRIPTS = {
-    "minecraft": "Minecraft'ta bu gizli hileyi biliyor muydunuz? Nether portalının yanına blok koyarsanız patlama riskini yarıya indirirsiniz! Daha fazlası için abone olun!",
-    "roblox": "Roblox'ta en hızlı seviye atlama taktiği açıklandı! Oyundaki bu gizli kapıdan geçerek 10 kat daha fazla xp kazanabilirsiniz! Takip etmeyi unutmayın!",
-    "default": "Oyun dünyasındaki bu inanılmaz anı sonuna kadar izleyin! Abone olmayı ve videoyu beğenmeyi unutmayın!"
+    "minecraft": "Did you know this terrifying Minecraft secret? Players who went into the deep dark at 3 AM reported hearing strange voices calling their name! Subscribe to stay safe!",
+    "roblox": "The fastest level-up glitch in Roblox was just discovered! Passing through this secret door grants you 10 times more XP instantly! Follow for more secrets!",
+    "default": "Watch until the very end of this insane gaming moment! Don't forget to like and subscribe for daily videos!"
 }
 
 def generate_metadata(niche: str, language: str = "tr", filename: str = "") -> Dict[str, str]:
