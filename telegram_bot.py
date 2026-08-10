@@ -1,3 +1,4 @@
+import os
 import requests
 from typing import Optional
 from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
