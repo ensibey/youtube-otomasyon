@@ -5,6 +5,17 @@ from pathlib import Path
 from config import CLIP_POOL_DIR
 from database import log_event
 
+DEFAULT_GAMEPLAY_CLIPS = {
+    "minecraft": [
+        "https://vjs.zencdn.net/v/oceans.mp4",
+        "https://www.w3schools.com/html/mov_bbb.mp4"
+    ],
+    "roblox": [
+        "https://vjs.zencdn.net/v/oceans.mp4",
+        "https://www.w3schools.com/html/mov_bbb.mp4"
+    ]
+}
+
 def get_gameplay_clip(niche: str) -> str:
     """
     Returns a real gameplay video clip from clip_pool/ or downloads open sample video.
