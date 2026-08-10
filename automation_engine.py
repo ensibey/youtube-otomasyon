@@ -69,9 +69,9 @@ def run_channel_pipeline(channel_id: str) -> Dict[str, Any]:
     hashtags = metadata.get("hashtags", "#shorts #gaming #viral")
     hook = metadata.get("hook", "BEKLE VE GÖR! 😱")
 
-    # 5. Process & Edit Video into 9:16 Shorts Format
+    # 5. Process & Edit Video into 9:16 Shorts Format with Real Gameplay Video
     output_filename = f"shorts_{channel_id}_{int(time.time())}.mp4"
-    final_shorts_path = process_shorts_video(input_video_path, output_filename, hook)
+    final_shorts_path = process_shorts_video(input_video_path, output_filename, hook, niche=niche)
 
     if not final_shorts_path or not os.path.exists(final_shorts_path):
         error_msg = "Video editleme/dönüştürme başarısız oldu."

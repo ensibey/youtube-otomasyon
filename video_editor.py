@@ -9,17 +9,14 @@ def process_shorts_video(
     input_video_path: str,
     output_filename: str,
     hook_text: str = "WAIT FOR THE END 😱",
-    audio_path: Optional[str] = None
+    niche: str = "minecraft"
 ) -> str:
     """
-    Transforms any video or AI audio into a vibrant 9:16 vertical Shorts video (1080x1920).
-    Uses background gameplay clips from clip_pool/ or generates dynamic animated color background if input is audio.
+    Transforms video or AI audio into a vibrant 9:16 vertical Shorts video (1080x1920).
+    When input is AI voiceover audio, fetches real Minecraft/Roblox gameplay videos automatically!
     """
     output_path = OUTPUT_DIR / output_filename
     clean_hook = hook_text.replace("'", "").replace(":", "-").replace('"', '')
-
-    clip_pool_dir = Path(__file__).parent / "clip_pool"
-    bg_clips = list(clip_pool_dir.glob("*.mp4")) if clip_pool_dir.exists() else []
 
     is_audio_only = input_video_path.endswith(".mp3") or input_video_path.endswith(".wav")
 
@@ -27,16 +24,19 @@ def process_shorts_video(
 
     if is_audio_only:
         audio_file = input_video_path
-        if bg_clips:
-            bg_file = str(bg_clips[0])
+        # Fetch real Minecraft/Roblox gameplay clip
+        from video_fetcher import get_gameplay_clip
+        bg_file = get_gameplay_clip(niche)
+
+        if bg_file and os.path.exists(bg_file):
             filter_complex = (
                 "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,"
                 "crop=1080:1920,"
-                f"drawtext=text='{clean_hook}':fontcolor=yellow:fontsize=56:x=(w-text_w)/2:y=180:"
+                f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=yellow:fontsize=56:x=(w-text_w)/2:y=180:"
                 "box=1:boxcolor=black@0.8:boxborderw=20[v]"
             )
             ffmpeg_cmd.extend([
-                "-i", bg_file,
+                "-stream_loop", "-1", "-i", bg_file,
                 "-i", audio_file,
                 "-filter_complex", filter_complex,
                 "-map", "[v]",
@@ -44,7 +44,7 @@ def process_shorts_video(
                 "-shortest"
             ])
         else:
-            # Fast dynamic color background using color animation
+            # Fallback color canvas if clip fetch fails
             filter_complex = (
                 "[0:v]scale=1080:1920,"
                 f"drawtext=fontfile='C\\:/Windows/Fonts/arial.ttf':text='{clean_hook}':fontcolor=yellow:fontsize=52:x=(w-text_w)/2:y=200:"
