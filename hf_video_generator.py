@@ -32,25 +32,28 @@ def generate_hf_ai_video(prompt: str, niche: str) -> str:
                 log_event(None, "INFO", f"Hugging Face AI Video servisine bağlanılıyor: {space}...")
                 client = Client(space)
                 
-                # Predict video generation
-                result = client.predict(
-                    full_prompt,
-                    api_name="/generate" if "ltx" in space.lower() else "/predict"
-                )
-                
-                if result and os.path.exists(result):
+                result = None
+                try:
+                    result = client.predict(full_prompt)
+                except Exception:
+                    try:
+                        result = client.predict(full_prompt, api_name="/predict")
+                    except Exception:
+                        result = client.predict(full_prompt, "low quality", api_name="/generate")
+
+                if result and isinstance(result, str) and os.path.exists(result):
                     dest_file = CLIP_POOL_DIR / f"hf_ai_video_{int(time.time())}.mp4"
                     shutil.copy(result, str(dest_file))
                     log_event(None, "INFO", f"Hugging Face AI Video başarıyla indirildi: {dest_file.name}")
                     return str(dest_file)
             except Exception as e:
-                log_event(None, "WARNING", f"HF Space ({space}) denemesi başarısız oldu: {str(e)[:100]}")
+                log_event(None, "WARNING", f"HF Space ({space}) denemesi başarısız oldu: {str(e)[:80]}")
                 continue
 
     except Exception as e:
         log_event(None, "ERROR", f"Hugging Face gradio_client genel hata: {str(e)}")
 
-    # Fallback to gameplay video fetcher if HF spaces are queuing/busy
+    # Fallback to gameplay clip if HF spaces are queuing or failing
     from video_fetcher import get_gameplay_clip
     return get_gameplay_clip(niche)
 
