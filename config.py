@@ -32,18 +32,21 @@ class ChannelConfig(BaseModel):
     made_for_kids: bool = False
     voice: str = "tr-TR-AhmetNeural"
 
-# 10 VIRAL HIGH-RETENTION CHANNELS CONFIGURATION
+# 10 PURE MINECRAFT & ROBLOX AI CHANNELS
 DEFAULT_CHANNELS: List[ChannelConfig] = [
-    ChannelConfig(id="ch_01", name="Craft Gizemleri TR", niche="minecraft_myths", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_02", name="CraftStories HQ (EN)", niche="minecraft_stories", language="en", voice="en-US-ChristopherNeural"),
-    ChannelConfig(id="ch_03", name="BloxTR Shorts", niche="roblox_bugs", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_04", name="BloxConfessions (EN)", niche="roblox_drama", language="en", voice="en-US-JennyNeural"),
-    ChannelConfig(id="ch_05", name="BrainrotCraft Shorts", niche="brainrot_memes", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_06", name="GTA Rampage Shorts", niche="gta_stunts", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_07", name="Satisfying Gaming ASMR", niche="satisfying_asmr", language="en", voice="en-US-AriaNeural"),
-    ChannelConfig(id="ch_08", name="VsGaming Shorts", niche="gaming_versus", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_09", name="ProGamer Taktik", niche="pro_hacks", language="tr", voice="tr-TR-AhmetNeural"),
-    ChannelConfig(id="ch_10", name="Komik Oyun Anları", niche="funny_fails", language="tr", voice="tr-TR-EmelNeural"),
+    # 5 MINECRAFT AI CHANNELS
+    ChannelConfig(id="ch_01", name="Minecraft AI Hikayeleri TR", niche="mc_ai_stories_tr", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_02", name="Minecraft AI Gizemleri TR", niche="mc_ai_myths_tr", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_03", name="Minecraft AI Shorts Global (EN)", niche="mc_ai_global_en", language="en", voice="en-US-ChristopherNeural"),
+    ChannelConfig(id="ch_04", name="Minecraft AI Brainrot & Memes", niche="mc_ai_memes", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_05", name="Minecraft AI Satisfying ASMR", niche="mc_ai_asmr", language="en", voice="en-US-AriaNeural"),
+
+    # 5 ROBLOX AI CHANNELS
+    ChannelConfig(id="ch_06", name="Roblox AI Hikayeleri TR", niche="roblox_ai_stories_tr", language="tr", voice="tr-TR-EmelNeural"),
+    ChannelConfig(id="ch_07", name="Roblox AI Gizli Taktikler TR", niche="roblox_ai_hacks_tr", language="tr", voice="tr-TR-AhmetNeural"),
+    ChannelConfig(id="ch_08", name="Roblox AI Confessions (EN)", niche="roblox_ai_global_en", language="en", voice="en-US-JennyNeural"),
+    ChannelConfig(id="ch_09", name="Roblox AI Brookhaven Sırları", niche="roblox_ai_brookhaven", language="tr", voice="tr-TR-EmelNeural"),
+    ChannelConfig(id="ch_10", name="Roblox vs Minecraft AI Battles", niche="roblox_ai_versus", language="tr", voice="tr-TR-AhmetNeural"),
 ]
 
 VOICES = {
