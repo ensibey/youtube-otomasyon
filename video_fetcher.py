@@ -2,30 +2,41 @@ import os
 import random
 import requests
 from pathlib import Path
-from config import CLIP_POOL_DIR
+from config import CLIP_POOL_DIR, DEFAULT_GAMEPLAY_CLIPS
 from database import log_event
 
 def get_gameplay_clip(niche: str) -> str:
     """
-    Returns a real Minecraft/Roblox gameplay video clip from clip_pool/ directory.
-    User can drop any .mp4 gameplay/parkour files into clip_pool/ for custom videos.
+    Returns a real gameplay video clip from clip_pool/ or downloads open sample video.
     """
     niche_lower = niche.lower()
     tag = "minecraft" if any(k in niche_lower for k in ["mc", "minecraft", "craft"]) else "roblox"
 
-    # Fetch all valid MP4 clips in clip_pool/
-    clips = [f for f in CLIP_POOL_DIR.glob("*.mp4") if f.stat().st_size > 100000]
-    
-    # Filter tag specific clips if available
-    tag_clips = [f for f in clips if tag in f.name.lower()]
-    pool = tag_clips if tag_clips else clips
-
-    if pool:
-        selected = random.choice(pool)
+    # 1. Check existing MP4 clips in clip_pool/
+    local_clips = [f for f in CLIP_POOL_DIR.glob("*.mp4") if f.stat().st_size > 100000]
+    if local_clips:
+        selected = random.choice(local_clips)
         log_event(None, "INFO", f"Klip havuzundan oynanış klibi seçildi: {selected.name}")
         return str(selected)
 
-    log_event(None, "WARNING", "clip_pool klasöründe henüz .mp4 oynanış videosu bulunamadı.")
+    # 2. Download high quality gameplay clip
+    urls = DEFAULT_GAMEPLAY_CLIPS.get(tag, DEFAULT_GAMEPLAY_CLIPS["minecraft"])
+    target_url = random.choice(urls)
+    dest_path = CLIP_POOL_DIR / f"gameplay_{tag}.mp4"
+
+    try:
+        log_event(None, "INFO", f"Arka plan klibi indiriliyor: {target_url}...")
+        r = requests.get(target_url, stream=True, timeout=30)
+        if r.status_code == 200:
+            with open(dest_path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=1024*1024):
+                    if chunk:
+                        f.write(chunk)
+            log_event(None, "INFO", f"Klip indirildi: {dest_path.name}")
+            return str(dest_path)
+    except Exception as e:
+        log_event(None, "ERROR", f"Oynanış klibi indirme hatası: {str(e)}")
+
     return ""
 
 if __name__ == "__main__":
