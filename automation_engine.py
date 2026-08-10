@@ -76,9 +76,9 @@ def run_channel_pipeline(channel_id: str) -> Dict[str, Any]:
         from hf_video_generator import generate_hf_ai_video
         ai_prompt = f"{niche} viral shorts scene, {title}"
         ai_video_clip = generate_hf_ai_video(ai_prompt, niche)
-        final_shorts_path = process_shorts_video(ai_video_clip, output_filename, hook, niche=niche)
+        final_shorts_path = process_shorts_video(ai_video_clip, output_filename, hook, voiceover_file, niche=niche)
     else:
-        final_shorts_path = process_shorts_video(input_video_path, output_filename, hook, niche=niche)
+        final_shorts_path = process_shorts_video(input_video_path, output_filename, hook, voiceover_file, niche=niche)
 
     if not final_shorts_path or not os.path.exists(final_shorts_path):
         error_msg = "Video editleme/dönüştürme başarısız oldu."
