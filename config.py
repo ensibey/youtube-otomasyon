@@ -5,6 +5,15 @@ from typing import Dict, List, Optional
 
 BASE_DIR = Path(__file__).resolve().parent
 
+# Auto-load .env file into environment variables
+env_file = BASE_DIR / ".env"
+if env_file.exists():
+    with open(env_file, "r", encoding="utf-8") as f:
+        for line in f:
+            if "=" in line and not line.startswith("#"):
+                key, val = line.strip().split("=", 1)
+                os.environ[key] = val
+
 # Directory Definitions
 DOWNLOADS_DIR = BASE_DIR / "downloads"
 OUTPUT_DIR = BASE_DIR / "output"

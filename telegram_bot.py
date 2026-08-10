@@ -16,7 +16,10 @@ def send_telegram_notification(
     Sends real-time notification to user's Telegram chat or group.
     If video_file_path exists, sends the actual rendered MP4 video directly to Telegram!
     """
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", TELEGRAM_BOT_TOKEN)
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", TELEGRAM_CHAT_ID)
+
+    if not bot_token or not chat_id:
         log_event(None, "WARNING", "Telegram BOT_TOKEN veya CHAT_ID tanımlı değil. Telegram bildirimi atlandı.")
         print(f"[TELEGRAM NOTIFICATION MOCK] {channel_name} | {title} | {video_url}")
         return False
@@ -35,12 +38,12 @@ def send_telegram_notification(
 
     # 1. Try sending the rendered MP4 video file directly to Telegram Chat
     if video_file_path and os.path.exists(video_file_path):
-        send_video_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendVideo"
+        send_video_url = f"https://api.telegram.org/bot{bot_token}/sendVideo"
         try:
             with open(video_file_path, "rb") as video_file:
                 files = {"video": video_file}
                 data = {
-                    "chat_id": TELEGRAM_CHAT_ID,
+                    "chat_id": chat_id,
                     "caption": caption,
                     "parse_mode": "Markdown"
                 }
@@ -52,9 +55,9 @@ def send_telegram_notification(
             log_event(None, "ERROR", f"Telegram video gönderme hatası: {str(e)}")
 
     # 2. Fallback: Send text message notification
-    telegram_api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    telegram_api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
+        "chat_id": chat_id,
         "text": caption,
         "parse_mode": "Markdown",
         "disable_web_page_preview": False
