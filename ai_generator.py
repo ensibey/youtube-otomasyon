@@ -92,7 +92,7 @@ def generate_metadata(niche: str, language: str = "tr", filename: str = "") -> D
     return selected
 
 def generate_script(niche: str, language: str = "tr") -> str:
-    """Generates 30-second AI Voiceover script using Gemini 1.5 API or Fallback."""
+    """Generates 25-second viral storytelling AI Voiceover script using Gemini 1.5 API or Fallback."""
     if GEMINI_API_KEY:
         try:
             import google.generativeai as genai
@@ -100,10 +100,14 @@ def generate_script(niche: str, language: str = "tr") -> str:
             model = genai.GenerativeModel("gemini-1.5-flash")
 
             prompt = f"""
-            Write a 25-second viral YouTube Shorts Voiceover script about {niche} gaming.
-            Language: '{language}'.
-            Include a strong opening hook, interesting secret/fact, and call to subscribe.
-            Return ONLY the plain text script to be read out loud by TTS engine. No brackets or stage notes.
+            You are a master viral TikTok/Shorts storyteller for {niche} gaming content.
+            Write an ultra-engaging 25-second storytelling voiceover script in '{language}'.
+            Requirements:
+            - Start with a dramatic 3-second opening hook (e.g. 'Minecraft'ın bu karanlık sırrını kimse bilmiyordu...' or 'Bu Roblox oyuncusu 03:00'da ne gördü?').
+            - Tell a thrilling short story, mystery, creepypasta, or mind-blowing trick.
+            - Include a shocking plot twist in the middle.
+            - End with a strong call to action ('Daha fazlası için takip et!').
+            Return ONLY plain text to be spoken by TTS engine. No stage instructions or brackets.
             """
             response = model.generate_content(prompt)
             return response.text.strip()

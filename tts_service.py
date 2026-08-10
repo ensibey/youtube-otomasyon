@@ -5,7 +5,8 @@ from config import OUTPUT_DIR, VOICES
 from database import log_event
 
 async def _generate_audio_async(text: str, voice: str, output_path: str):
-    communicate = edge_tts.Communicate(text, voice)
+    # Use natural speech rate (+6% faster) for viral TikTok/Shorts pacing
+    communicate = edge_tts.Communicate(text, voice, rate="+6%")
     await communicate.save(output_path)
 
 def generate_voiceover(text: str, voice: str = "tr-TR-AhmetNeural", output_filename: str = "voiceover.mp3") -> str:
