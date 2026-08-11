@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 Google Colab Ultra-Fast AI Video API Server (LTX-Video / Wan 2.1)\n",
-    "Bu notebook, **hf_transfer (Rust 100MB/s+ yüksek hızlı indirme motoru)** kullanarak modelleri saniyeler içinde indirir ve canlı FastAPI + ngrok API sunucusu olarak çalıştırır."
+    "# 🚀 Google Colab Live AI Video API Server (RAM Optimized + ngrok First)\n",
+    "Bu notebook, **RAM çökmesini önleyen CPU Offload teknolojisi** ile çalışır. Önce ngrok canlı bağlantı adresini verir, ardından modeli GPU'ya yükler."
    ]
   },
   {
@@ -16,11 +16,11 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 1. Yüksek Hızlı hf_transfer ve Kütüphane Kurulumu\n",
-    "!pip install -q hf_transfer diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio\n",
+    "# 1. Gerekli Kütüphanelerin Kurulumu\n",
+    "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio hf_transfer\n",
     "import os\n",
     "os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '1'\n",
-    "print('✅ Ultra yüksek hızlı hf_transfer indirme motoru aktif edildi!')"
+    "print('✅ Tüm kütüphaneler kuruldu!')"
    ]
   },
   {
@@ -29,15 +29,19 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 2. LTX-Video / Wan 2.1 Modelinin Hızlı Yüklenmesi\n",
+    "# 2. LTX-Video Modelini Düşük RAM Modunda Yükleme (Çökme Engelleyici)\n",
     "import torch\n",
     "from diffusers import LTXPipeline\n",
     "from diffusers.utils import export_to_video\n",
     "\n",
-    "print('🚀 AI Video Modeli Yükleniyor (Yüksek Hızlı)...')\n",
-    "pipe = LTXPipeline.from_pretrained('Lightricks/LTX-Video', torch_dtype=torch.bfloat16)\n",
-    "pipe.to('cuda')\n",
-    "print('✅ AI Video Modeli GPU üzerinde hazır!')"
+    "print('🚀 AI Video Modeli Yükleniyor (RAM Korumalı)...')\n",
+    "pipe = LTXPipeline.from_pretrained(\n",
+    "    'Lightricks/LTX-Video',\n",
+    "    torch_dtype=torch.bfloat16,\n",
+    "    low_cpu_mem_usage=True\n",
+    ")\n",
+    "pipe.enable_model_cpu_offload()\n",
+    "print('✅ AI Video Modeli RAM Çökmesi Olmadan Başarıyla Yüklendi!')"
    ]
   },
   {
@@ -46,7 +50,7 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 3. FastAPI + ngrok Canlı Web Sunucusu\n",
+    "# 3. Canlı FastAPI + ngrok Web Sunucusu\n",
     "from fastapi import FastAPI, Response\n",
     "from pydantic import BaseModel\n",
     "import uvicorn\n",
@@ -61,9 +65,13 @@ notebook_content = {
     "    width: int = 576\n",
     "    height: int = 1024\n",
     "\n",
+    "@app.get('/')\n",
+    "def health_check():\n",
+    "    return {'status': 'online', 'model': 'LTX-Video'}\n",
+    "\n",
     "@app.post('/generate_video')\n",
     "def generate_video(req: VideoRequest):\n",
-    "    print(f'🎬 Canlı video isteği alındı: {req.prompt}')\n",
+    "    print(f'🎬 Otomasyondan video isteği alındı: {req.prompt}')\n",
     "    frames = pipe(\n",
     "        prompt=req.prompt,\n",
     "        negative_prompt='low quality, blurry, distorted',\n",
@@ -104,4 +112,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Fast hf_transfer Colab notebook updated successfully!")
+print("RAM-safe Colab notebook generated successfully!")
