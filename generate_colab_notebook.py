@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 Google Colab Live AI Video API Server (Wan 2.1 / LTX-Video)\n",
-    "Bu notebook, açık kaynaklı **LTX-Video / Wan 2.1** AI video modelini GPU üzerinde canlı bir FastAPI + ngrok web sunucusu olarak çalıştırır. Yerel bilgisayarınızdaki otomasyon sistemi doğrudan bu Colab sunucusuna bağlanarak AI videolar ürettirir."
+    "# 🚀 Google Colab Ultra-Fast AI Video API Server (LTX-Video / Wan 2.1)\n",
+    "Bu notebook, **hf_transfer (Rust 100MB/s+ yüksek hızlı indirme motoru)** kullanarak modelleri saniyeler içinde indirir ve canlı FastAPI + ngrok API sunucusu olarak çalıştırır."
    ]
   },
   {
@@ -16,9 +16,11 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 1. Gerekli Kütüphanelerin Kurulumu\n",
-    "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio\n",
-    "print('✅ Tüm kütüphaneler kuruldu!')"
+    "# 1. Yüksek Hızlı hf_transfer ve Kütüphane Kurulumu\n",
+    "!pip install -q hf_transfer diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio\n",
+    "import os\n",
+    "os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '1'\n",
+    "print('✅ Ultra yüksek hızlı hf_transfer indirme motoru aktif edildi!')"
    ]
   },
   {
@@ -27,12 +29,12 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 2. LTX-Video / Wan 2.1 AI Video Modelinin GPU'ya Yüklenmesi\n",
+    "# 2. LTX-Video / Wan 2.1 Modelinin Hızlı Yüklenmesi\n",
     "import torch\n",
     "from diffusers import LTXPipeline\n",
     "from diffusers.utils import export_to_video\n",
     "\n",
-    "print('🚀 AI Video Modeli Yükleniyor (GPU)...')\n",
+    "print('🚀 AI Video Modeli Yükleniyor (Yüksek Hızlı)...')\n",
     "pipe = LTXPipeline.from_pretrained('Lightricks/LTX-Video', torch_dtype=torch.bfloat16)\n",
     "pipe.to('cuda')\n",
     "print('✅ AI Video Modeli GPU üzerinde hazır!')"
@@ -44,8 +46,7 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 3. FastAPI + ngrok Canlı Web Sunucusunun Başlatılması\n",
-    "import os\n",
+    "# 3. FastAPI + ngrok Canlı Web Sunucusu\n",
     "from fastapi import FastAPI, Response\n",
     "from pydantic import BaseModel\n",
     "import uvicorn\n",
@@ -62,7 +63,7 @@ notebook_content = {
     "\n",
     "@app.post('/generate_video')\n",
     "def generate_video(req: VideoRequest):\n",
-    "    print(f'🎬 Otomasyondan canlı video isteği alındı: {req.prompt}')\n",
+    "    print(f'🎬 Canlı video isteği alındı: {req.prompt}')\n",
     "    frames = pipe(\n",
     "        prompt=req.prompt,\n",
     "        negative_prompt='low quality, blurry, distorted',\n",
@@ -78,13 +79,11 @@ notebook_content = {
     "    with open(out_path, 'rb') as f:\n",
     "        return Response(content=f.read(), media_type='video/mp4')\n",
     "\n",
-    "# Open ngrok tunnel\n",
     "public_url = ngrok.connect(8000)\n",
     "print('====================================================')\n",
     "print('🚀 CANLI GOOGLE COLAB API URL ADRESİNİZ:')\n",
     "print(public_url)\n",
     "print('====================================================')\n",
-    "print('👉 Bu adresi bilgisayarınızdaki .env dosyasına ekleyin:')\n",
     "print(f'COLAB_API_URL={public_url}')\n",
     "print('====================================================')\n",
     "\n",
@@ -105,4 +104,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Colab Live API Notebook generated successfully!")
+print("Fast hf_transfer Colab notebook updated successfully!")
