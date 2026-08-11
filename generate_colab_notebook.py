@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 Google Colab Live AI Video API Server (Async Job Polling - No Timeout)\n",
-    "Bu notebook, **Cloudflare 524 Timeout (Zaman Aşımı) Engelleyici** Asenkron Görev mimarisini kullanır. Videoları arka planda üretip tam zamanlı teslim eder."
+    "# 🚀 Google Colab Live AI Video API Server (Jupyter & Port Safe)\n",
+    "Bu notebook, **port çakışmalarını temizleyen (!fuser -k 8000/tcp)** ve asenkron video üreten canlı FastAPI + Cloudflare sunucusudur."
    ]
   },
   {
@@ -54,7 +54,8 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 3. Asenkron FastAPI + Cloudflare Sunucusu (Sıfır Zaman Aşımı)\n",
+    "# 3. Eski Sunucuyu Temizle ve Asenkron Sunucuyu Başlat\n",
+    "!fuser -k 8000/tcp || true\n",
     "import subprocess, time, threading, uuid\n",
     "from fastapi import FastAPI, Response\n",
     "from pydantic import BaseModel\n",
@@ -101,8 +102,7 @@ notebook_content = {
     "\n",
     "@app.get('/job_status/{job_id}')\n",
     "def job_status(job_id: str):\n",
-    "    job_info = jobs.get(job_id, {'status': 'not_found'})\n",
-    "    return job_info\n",
+    "    return jobs.get(job_id, {'status': 'not_found'})\n",
     "\n",
     "@app.get('/download_video/{job_id}')\n",
     "def download_video(job_id: str):\n",
@@ -152,4 +152,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Async polling Colab notebook generated successfully!")
+print("Port-safe Colab notebook generated successfully!")
