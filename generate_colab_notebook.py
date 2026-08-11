@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 Google Colab Live AI Video API Server (Fail-Safe GPU/CPU + Auto-Device)\n",
-    "Bu notebook, **GPU / CPU duyarlı otomatik cihaz seçimi** kullanır. Cihazınız GPU modunda değilse otomatik algılar ve hatayı önler."
+    "# 🚀 Google Colab Live AI Video API Server (Zero Signup - Cloudflare Tunnel)\n",
+    "Bu notebook, **Cloudflare Tunnel (trycloudflare.com)** kullanır. Hesap oluşturma veya ngrok token gerektirmez, %100 ücretsiz canlı HTTPS API adresi üretir."
    ]
   },
   {
@@ -16,12 +16,14 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 1. Gerekli Kütüphanelerin Kurulumu\n",
-    "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio hf_transfer\n",
+    "# 1. Gerekli Kütüphaneler ve Cloudflare Tunnel Kurulumu\n",
+    "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn hf_transfer\n",
+    "!wget -q -O cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb\n",
+    "!dpkg -i cloudflared.deb\n",
     "import os, torch\n",
     "os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '1'\n",
     "device = 'cuda' if torch.cuda.is_available() else 'cpu'\n",
-    "print(f'✅ Tüm kütüphaneler kuruldu! Kullanılan Donanım: {device.upper()}')"
+    "print(f'✅ Kurulum Tamamlandı! Kullanılan Donanım: {device.upper()}')"
    ]
   },
   {
@@ -52,12 +54,12 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 3. Canlı FastAPI + ngrok Web Sunucusu\n",
+    "# 3. Canlı Cloudflare Tunnel + FastAPI Web Sunucusu\n",
+    "import subprocess, time\n",
     "from fastapi import FastAPI, Response\n",
     "from pydantic import BaseModel\n",
     "import uvicorn\n",
     "import nest_asyncio\n",
-    "from pyngrok import ngrok\n",
     "\n",
     "app = FastAPI()\n",
     "\n",
@@ -73,7 +75,7 @@ notebook_content = {
     "\n",
     "@app.post('/generate_video')\n",
     "def generate_video(req: VideoRequest):\n",
-    "    print(f'🎬 Otomasyondan video isteği alındı: {req.prompt}')\n",
+    "    print(f'🎬 Otomasyondan canlı video isteği alındı: {req.prompt}')\n",
     "    video_frames = pipe(\n",
     "        prompt=req.prompt,\n",
     "        num_inference_steps=20,\n",
@@ -88,12 +90,21 @@ notebook_content = {
     "    with open(out_path, 'rb') as f:\n",
     "        return Response(content=f.read(), media_type='video/mp4')\n",
     "\n",
-    "public_url = ngrok.connect(8000)\n",
+    "# Start Cloudflare Tunnel in background\n",
+    "subprocess.Popen(['cloudflared', 'tunnel', '--url', 'http://localhost:8000', '--logfile', '/content/cloudflared.log'])\n",
+    "time.sleep(4)\n",
+    "\n",
     "print('====================================================')\n",
-    "print('🚀 CANLI GOOGLE COLAB API URL ADRESİNİZ:')\n",
-    "print(public_url)\n",
-    "print('====================================================')\n",
-    "print(f'COLAB_API_URL={public_url}')\n",
+    "print('🚀 CANLI GOOGLE COLAB API URL ADRESİNİZ (Cloudflare):')\n",
+    "try:\n",
+    "    with open('/content/cloudflared.log') as f:\n",
+    "        for line in f:\n",
+    "            if 'trycloudflare.com' in line:\n",
+    "                url = [x for x in line.split() if 'trycloudflare.com' in x][0]\n",
+    "                print(url)\n",
+    "                print(f'COLAB_API_URL={url}')\n",
+    "except Exception:\n",
+    "    pass\n",
     "print('====================================================')\n",
     "\n",
     "nest_asyncio.apply()\n",
@@ -113,4 +124,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Auto-device Colab notebook generated successfully!")
+print("Cloudflare Tunnel Colab notebook generated successfully!")
