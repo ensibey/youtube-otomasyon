@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 Google Colab Live AI Video API Server (Zero Signup - Cloudflare Tunnel)\n",
-    "Bu notebook, **Cloudflare Tunnel (trycloudflare.com)** kullanır. Hesap oluşturma veya ngrok token gerektirmez, %100 ücretsiz canlı HTTPS API adresi üretir."
+    "# 🚀 Google Colab Live AI Video API Server (Jupyter Thread Safe)\n",
+    "Bu notebook, **Threading Safe Uvicorn** sunucusu ve Cloudflare Tunnel kullanır. Colab Jupyter event loop hatasını %100 engeller."
    ]
   },
   {
@@ -54,12 +54,11 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 3. Canlı Cloudflare Tunnel + FastAPI Web Sunucusu\n",
-    "import subprocess, time\n",
+    "# 3. Thread-Safe Canlı FastAPI + Cloudflare Sunucusu\n",
+    "import subprocess, time, threading\n",
     "from fastapi import FastAPI, Response\n",
     "from pydantic import BaseModel\n",
     "import uvicorn\n",
-    "import nest_asyncio\n",
     "\n",
     "app = FastAPI()\n",
     "\n",
@@ -90,25 +89,34 @@ notebook_content = {
     "    with open(out_path, 'rb') as f:\n",
     "        return Response(content=f.read(), media_type='video/mp4')\n",
     "\n",
-    "# Start Cloudflare Tunnel in background\n",
+    "# Start Uvicorn in a background thread to prevent Jupyter asyncio conflict\n",
+    "def run_server():\n",
+    "    uvicorn.run(app, host='0.0.0.0', port=8000, log_level='info')\n",
+    "\n",
+    "thread = threading.Thread(target=run_server, daemon=True)\n",
+    "thread.start()\n",
+    "time.sleep(2)\n",
+    "\n",
+    "# Start Cloudflare Tunnel\n",
     "subprocess.Popen(['cloudflared', 'tunnel', '--url', 'http://localhost:8000', '--logfile', '/content/cloudflared.log'])\n",
-    "time.sleep(4)\n",
+    "time.sleep(5)\n",
     "\n",
     "print('====================================================')\n",
-    "print('🚀 CANLI GOOGLE COLAB API URL ADRESİNİZ (Cloudflare):')\n",
+    "print('🚀 CANLI GOOGLE COLAB API URL ADRESİNİZ:')\n",
     "try:\n",
     "    with open('/content/cloudflared.log') as f:\n",
     "        for line in f:\n",
     "            if 'trycloudflare.com' in line:\n",
-    "                url = [x for x in line.split() if 'trycloudflare.com' in x][0]\n",
-    "                print(url)\n",
-    "                print(f'COLAB_API_URL={url}')\n",
-    "except Exception:\n",
-    "    pass\n",
-    "print('====================================================')\n",
-    "\n",
-    "nest_asyncio.apply()\n",
-    "uvicorn.run(app, host='0.0.0.0', port=8000)"
+    "                urls = [x for x in line.split() if 'trycloudflare.com' in x]\n",
+    "                if urls:\n",
+    "                    clean_url = urls[0].strip()\n",
+    "                    if not clean_url.startswith('http'):\n",
+    "                        clean_url = 'https://' + clean_url\n",
+    "                    print(clean_url)\n",
+    "                    print(f'COLAB_API_URL={clean_url}')\n",
+    "except Exception as e:\n",
+    "    print('Cloudflare log read info:', e)\n",
+    "print('====================================================')"
    ]
   }
  ],
@@ -124,4 +132,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Cloudflare Tunnel Colab notebook generated successfully!")
+print("Thread-safe Uvicorn Colab notebook generated successfully!")
