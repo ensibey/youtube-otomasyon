@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 YouTube Shorts AI Video Generator (Google Colab)\n",
-    "Bu Colab notebook'u, açık kaynaklı **Wan 2.1 / LTX-Video** AI video modellerini kullanarak dikey (9:16) sinematik oyun klipleri üretir ve doğrudan Google Drive `/Pending` klasörünüze kaydeder."
+    "# 🚀 Google Colab Live AI Video API Server (Wan 2.1 / LTX-Video)\n",
+    "Bu notebook, açık kaynaklı **LTX-Video / Wan 2.1** AI video modelini GPU üzerinde canlı bir FastAPI + ngrok web sunucusu olarak çalıştırır. Yerel bilgisayarınızdaki otomasyon sistemi doğrudan bu Colab sunucusuna bağlanarak AI videolar ürettirir."
    ]
   },
   {
@@ -16,17 +16,9 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 1. Google Drive Bağlantısı ve Bağımlılıkların Kurulumu\n",
-    "from google.colab import drive\n",
-    "import os\n",
-    "\n",
-    "drive.mount('/content/drive')\n",
-    "\n",
-    "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg\n",
-    "\n",
-    "drive_pending_dir = '/content/drive/MyDrive/YouTube_Automation/Pending'\n",
-    "os.makedirs(drive_pending_dir, exist_ok=True)\n",
-    "print('✅ Google Drive Pending klasörü hazır:', drive_pending_dir)"
+    "# 1. Gerekli Kütüphanelerin Kurulumu\n",
+    "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio\n",
+    "print('✅ Tüm kütüphaneler kuruldu!')"
    ]
   },
   {
@@ -35,7 +27,7 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 2. Wan 2.1 / LTX-Video Modelini Yükleme ve 9:16 Video Üretimi\n",
+    "# 2. LTX-Video / Wan 2.1 AI Video Modelinin GPU'ya Yüklenmesi\n",
     "import torch\n",
     "from diffusers import LTXPipeline\n",
     "from diffusers.utils import export_to_video\n",
@@ -43,28 +35,61 @@ notebook_content = {
     "print('🚀 AI Video Modeli Yükleniyor (GPU)...')\n",
     "pipe = LTXPipeline.from_pretrained('Lightricks/LTX-Video', torch_dtype=torch.bfloat16)\n",
     "pipe.to('cuda')\n",
+    "print('✅ AI Video Modeli GPU üzerinde hazır!')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": None,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# 3. FastAPI + ngrok Canlı Web Sunucusunun Başlatılması\n",
+    "import os\n",
+    "from fastapi import FastAPI, Response\n",
+    "from pydantic import BaseModel\n",
+    "import uvicorn\n",
+    "import nest_asyncio\n",
+    "from pyngrok import ngrok\n",
     "\n",
-    "prompts = [\n",
-    "    'Cinematic 4k vertical 9:16 footage of a mysterious glowing cavern in Minecraft at night, highly detailed',\n",
-    "    'Photorealistic 9:16 vertical video of a player walking in an eerie empty Roblox city street at 3 AM, 60fps'\n",
-    "]\n",
+    "app = FastAPI()\n",
     "\n",
-    "for idx, prompt in enumerate(prompts, 1):\n",
-    "    print(f'🎬 Video {idx} üretiliyor: {prompt}...')\n",
-    "    video = pipe(\n",
-    "        prompt=prompt,\n",
+    "class VideoRequest(BaseModel):\n",
+    "    prompt: str\n",
+    "    niche: str = 'minecraft'\n",
+    "    width: int = 576\n",
+    "    height: int = 1024\n",
+    "\n",
+    "@app.post('/generate_video')\n",
+    "def generate_video(req: VideoRequest):\n",
+    "    print(f'🎬 Otomasyondan canlı video isteği alındı: {req.prompt}')\n",
+    "    frames = pipe(\n",
+    "        prompt=req.prompt,\n",
     "        negative_prompt='low quality, blurry, distorted',\n",
-    "        width=576,\n",
-    "        height=1024,\n",
-    "        num_frames=161,\n",
-    "        num_inference_steps=30\n",
+    "        width=req.width,\n",
+    "        height=req.height,\n",
+    "        num_frames=121,\n",
+    "        num_inference_steps=25\n",
     "    ).frames[0]\n",
     "    \n",
-    "    output_path = os.path.join(drive_pending_dir, f'colab_ai_video_{idx}.mp4')\n",
-    "    export_to_video(video, output_path, fps=24)\n",
-    "    print(f'✅ Video kaydedildi: {output_path}')\n",
+    "    out_path = '/content/colab_generated_video.mp4'\n",
+    "    export_to_video(frames, out_path, fps=24)\n",
+    "    \n",
+    "    with open(out_path, 'rb') as f:\n",
+    "        return Response(content=f.read(), media_type='video/mp4')\n",
     "\n",
-    "print('🎉 Tüm videolar başarıyla Google Drive Pending klasörüne kaydedildi!')"
+    "# Open ngrok tunnel\n",
+    "public_url = ngrok.connect(8000)\n",
+    "print('====================================================')\n",
+    "print('🚀 CANLI GOOGLE COLAB API URL ADRESİNİZ:')\n",
+    "print(public_url)\n",
+    "print('====================================================')\n",
+    "print('👉 Bu adresi bilgisayarınızdaki .env dosyasına ekleyin:')\n",
+    "print(f'COLAB_API_URL={public_url}')\n",
+    "print('====================================================')\n",
+    "\n",
+    "nest_asyncio.apply()\n",
+    "uvicorn.run(app, host='0.0.0.0', port=8000)"
    ]
   }
  ],
@@ -80,4 +105,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Notebook generated successfully!")
+print("Colab Live API Notebook generated successfully!")

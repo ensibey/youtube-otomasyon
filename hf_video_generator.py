@@ -19,9 +19,17 @@ HF_VIDEO_SPACES = [
 
 def generate_hf_ai_video(prompt: str, niche: str) -> str:
     """
-    Generates a 100% free AI video clip using Hugging Face Spaces & gradio_client (Wan / LTX-Video).
+    Generates a 100% free AI video clip using Google Colab Live API or Hugging Face Spaces.
     Returns path to downloaded MP4 AI video clip.
     """
+    # 1. Try Google Colab Live API if COLAB_API_URL is configured
+    from colab_client import request_colab_ai_video
+    colab_clip = request_colab_ai_video(prompt, niche)
+    if colab_clip and os.path.exists(colab_clip):
+        log_event(None, "INFO", f"Canlı Google Colab API ile video alındı: {colab_clip}")
+        return colab_clip
+
+    # 2. Try Hugging Face Free AI Video Spaces
     try:
         from gradio_client import Client
         
