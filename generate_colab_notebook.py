@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 Google Colab Live AI Video API Server (Ultra Stable - Zero Crash)\n",
-    "Bu notebook, **ModelScope 1.7B Text-to-Video** modelini kullanır. Yalnızca 3.2 GB boyutundadır, 4GB RAM ile çalışır ve Colab RAM'ini asla taşırmaz."
+    "# 🚀 Google Colab Live AI Video API Server (Fail-Safe GPU/CPU + Auto-Device)\n",
+    "Bu notebook, **GPU / CPU duyarlı otomatik cihaz seçimi** kullanır. Cihazınız GPU modunda değilse otomatik algılar ve hatayı önler."
    ]
   },
   {
@@ -18,9 +18,10 @@ notebook_content = {
    "source": [
     "# 1. Gerekli Kütüphanelerin Kurulumu\n",
     "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio hf_transfer\n",
-    "import os\n",
+    "import os, torch\n",
     "os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '1'\n",
-    "print('✅ Tüm kütüphaneler kuruldu!')"
+    "device = 'cuda' if torch.cuda.is_available() else 'cpu'\n",
+    "print(f'✅ Tüm kütüphaneler kuruldu! Kullanılan Donanım: {device.upper()}')"
    ]
   },
   {
@@ -29,19 +30,20 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 2. Text-to-Video AI Modelinin Yüklenmesi (Sıfır RAM Çökmesi)\n",
-    "import torch\n",
+    "# 2. Text-to-Video AI Modelinin Yüklenmesi\n",
     "from diffusers import DiffusionPipeline\n",
     "from diffusers.utils import export_to_video\n",
     "\n",
-    "print('🚀 AI Video Modeli Yükleniyor (RAM Korumalı)...')\n",
+    "print(f'🚀 AI Video Modeli {device.upper()} Üzerinde Yükleniyor...')\n",
+    "dtype = torch.float16 if device == 'cuda' else torch.float32\n",
     "pipe = DiffusionPipeline.from_pretrained(\n",
     "    'damo-vilab/text-to-video-ms-1.7b',\n",
-    "    torch_dtype=torch.float16\n",
+    "    torch_dtype=dtype\n",
     ")\n",
-    "pipe.to('cuda')\n",
-    "pipe.enable_attention_slicing()\n",
-    "print('✅ AI Video Modeli RAM Çökmesi Olmadan Başarıyla Yüklendi!')"
+    "pipe = pipe.to(device)\n",
+    "if device == 'cuda':\n",
+    "    pipe.enable_attention_slicing()\n",
+    "print('✅ AI Video Modeli Başarıyla Yüklendi!')"
    ]
   },
   {
@@ -67,7 +69,7 @@ notebook_content = {
     "\n",
     "@app.get('/')\n",
     "def health_check():\n",
-    "    return {'status': 'online', 'model': 'ModelScope 1.7B'}\n",
+    "    return {'status': 'online', 'model': 'ModelScope 1.7B', 'device': device}\n",
     "\n",
     "@app.post('/generate_video')\n",
     "def generate_video(req: VideoRequest):\n",
@@ -111,4 +113,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Stable ModelScope Colab notebook generated successfully!")
+print("Auto-device Colab notebook generated successfully!")
