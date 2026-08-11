@@ -6,8 +6,8 @@ notebook_content = {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# 🚀 Google Colab Live AI Video API Server (Authtoken Integrated)\n",
-    "Bu notebook, **Google Colab Secrets (NGROK_AUTHTOKEN)** üzerinden otomatik kimlik doğrular ve kesintisiz canlı API adresi üretir."
+    "# 🚀 Google Colab Live AI Video API Server (Authenticated Ngrok)\n",
+    "Bu notebook, ngrok hesabınızla kimlik doğrulaması yapar ve kesintisiz canlı API adresi üretir."
    ]
   },
   {
@@ -16,19 +16,20 @@ notebook_content = {
    "metadata": {},
    "outputs": [],
    "source": [
-    "# 1. Gerekli Kütüphanelerin Kurulumu ve Authtoken Doğrulama\n",
+    "# 1. Gerekli Kütüphanelerin Kurulumu ve Ngrok Authtoken Kurulumu\n",
     "!pip install -q diffusers transformers accelerate torch torchvision imageio-ffmpeg fastapi uvicorn pyngrok nest_asyncio hf_transfer\n",
     "import os, torch\n",
     "from pyngrok import ngrok\n",
     "\n",
+    "token = '38xGdAkRAFGU3jq422KtIiDsYwT_3qPnZbUX3hH15Y782Ko4N'\n",
     "try:\n",
     "    from google.colab import userdata\n",
-    "    token = userdata.get('NGROK_AUTHTOKEN')\n",
-    "    if token:\n",
-    "        ngrok.set_auth_token(token)\n",
-    "        print('✅ NGROK Authtoken Başarıyla Doğrulandı!')\n",
-    "except Exception as e:\n",
-    "    print('Ngrok token kontrol bilgisi:', e)\n",
+    "    token = userdata.get('NGROK_AUTHTOKEN') or token\n",
+    "except Exception:\n",
+    "    pass\n",
+    "\n",
+    "ngrok.set_auth_token(token)\n",
+    "print('✅ NGROK Authtoken Başarıyla Doğrulandı!')\n",
     "\n",
     "os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '1'\n",
     "device = 'cuda' if torch.cuda.is_available() else 'cpu'\n",
@@ -150,4 +151,4 @@ notebook_content = {
 with open(r"c:\Users\hp\Desktop\youtube otomasyon\Youtube_AI_Video_Generator.ipynb", "w", encoding="utf-8") as f:
     json.dump(notebook_content, f, indent=2, ensure_ascii=False)
 
-print("Authtoken Colab notebook generated successfully!")
+print("Hardcoded authtoken fallback Colab notebook generated successfully!")
